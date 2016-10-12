@@ -13,6 +13,8 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 /**
@@ -86,7 +88,10 @@ public class MainActivityFragment extends Fragment {
                 }*/
 
                 if (position <= mMoviePosterList.size()) {
-                    imageView.setImageResource(mMoviePosterList.get(position));
+                    // Old-fashioned way of loading image.
+                    //imageView.setImageResource(mMoviePosterList.get(position));
+                    // Loading image with Picasso.
+                    Picasso.with(getActivity()).load(mMoviePosterList.get(position)).into(imageView);
                 }
 
                 return convertView;
