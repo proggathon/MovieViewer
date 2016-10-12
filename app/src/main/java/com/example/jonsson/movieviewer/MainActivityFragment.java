@@ -9,9 +9,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -77,16 +79,6 @@ public class MainActivityFragment extends Fragment {
                 //Drawable myImage = getResources().getDrawable(R.drawable.anal_machine_intelligence); // Deprecated way of getting drawable
                 Drawable myImage = ResourcesCompat.getDrawable(getResources(), R.drawable.anal_machine_intelligence, null);
 
-                // Setting image as a background.
-                // Probably not the best method as this is for a general view.
-                // Since we have an ImageView, setImageResource is probably more suiting.
-                /*if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                    imageView.setBackgroundDrawable(myImage);
-                }
-                else {
-                    imageView.setBackground(myImage);
-                }*/
-
                 if (position <= mMoviePosterList.size()) {
                     // Old-fashioned way of loading image.
                     //imageView.setImageResource(mMoviePosterList.get(position));
@@ -108,6 +100,12 @@ public class MainActivityFragment extends Fragment {
         }
 
         // TODO Set an onClickListener for the objects.
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getActivity(), "Item " + position + " clicked.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // TODO Write function that updates the content (using the mMoviePosterAdapter)
 
