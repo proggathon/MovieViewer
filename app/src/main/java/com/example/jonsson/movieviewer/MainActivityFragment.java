@@ -1,5 +1,6 @@
 package com.example.jonsson.movieviewer;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment {
+
+    public final static String INTENT_EXTRA_MESSAGE = "com.example.jonsson.movieviewer.EXTRA_MESSAGE";
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private ArrayAdapter<Integer> mMoviePosterAdapter;
@@ -76,36 +79,42 @@ public class MainActivityFragment extends Fragment {
                 }
 
                 ImageView imageView = (ImageView) convertView.findViewById(R.id.gridImageView);
-                //Drawable myImage = getResources().getDrawable(R.drawable.anal_machine_intelligence); // Deprecated way of getting drawable
                 Drawable myImage = ResourcesCompat.getDrawable(getResources(), R.drawable.anal_machine_intelligence, null);
 
                 if (position <= mMoviePosterList.size()) {
-                    // Old-fashioned way of loading image.
-                    //imageView.setImageResource(mMoviePosterList.get(position));
                     // Loading image with Picasso.
-                    Picasso.with(getActivity()).load(mMoviePosterList.get(position)).into(imageView);
+                    Picasso.with(getActivity())
+                            .load(mMoviePosterList.get(position))
+                            .into(imageView);
                 }
 
                 return convertView;
             }
         };
 
-        // Get the gridview and assign the adapter.
+        // Get the gridview and assign the adapter and click listener.
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview);
         if (gridView != null) {
             gridView.setAdapter(mMoviePosterAdapter);
+            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(getActivity(), "Item " + position + " clicked.", Toast.LENGTH_SHORT).show();
+
+                    // Create intent to launch a detailed activity.
+                    Intent detailActivityIntent = new Intent(getActivity(), DetailActivity.class);
+                    // Include which movie was clicked in the Intent info (temporarily).
+                    detailActivityIntent.putExtra(INTENT_EXTRA_MESSAGE, String.valueOf(position));
+                    // Include the movie Uri in the Intent.
+                    //detailActivityIntent.setData()
+                    startActivity(detailActivityIntent);
+                }
+            });
         }
         else {
             Log.e(LOG_TAG, "GridView not found.");
         }
 
-        // TODO Set an onClickListener for the objects.
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getActivity(), "Item " + position + " clicked.", Toast.LENGTH_SHORT).show();
-            }
-        });
 
         // TODO Write function that updates the content (using the mMoviePosterAdapter)
 
