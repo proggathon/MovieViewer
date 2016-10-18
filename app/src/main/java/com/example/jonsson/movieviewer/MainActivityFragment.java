@@ -2,6 +2,8 @@ package com.example.jonsson.movieviewer;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,10 +16,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -28,6 +39,7 @@ public class MainActivityFragment extends Fragment {
     public final static String INTENT_EXTRA_MESSAGE = "com.example.jonsson.movieviewer.EXTRA_MESSAGE";
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private final String MOVIEDB_API_KEY = "c3904d3a83cbe46c87a641fcbb7673e5";
     private ArrayAdapter<Integer> mMoviePosterAdapter;
     private ArrayList<Integer> mMoviePosterList;
 
@@ -99,7 +111,13 @@ public class MainActivityFragment extends Fragment {
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(getActivity(), "Item " + position + " clicked.", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getActivity(), "Item " + position + " clicked.", Toast.LENGTH_SHORT).show();
+
+                    String queryString = getPopularMoviesURL();
+
+                    Log.i(LOG_TAG, queryString);
+
+                    new FetchMovieDBTask().execute(queryString);
 
                     // Create intent to launch a detailed activity.
                     Intent detailActivityIntent = new Intent(getActivity(), DetailActivity.class);
@@ -115,11 +133,164 @@ public class MainActivityFragment extends Fragment {
             Log.e(LOG_TAG, "GridView not found.");
         }
 
-
-        // TODO Write function that updates the content (using the mMoviePosterAdapter)
-
         return rootView;
     }
 
-    //private class ImageAdapter extends
+    private String getPopularMoviesURL() {
+        return createMovieDataBaseURL("popular");
+    }
+
+    private String getTopRatedMoviesURL() {
+        return createMovieDataBaseURL("top_rated");
+    }
+
+    private String createMovieDataBaseURL(String listingType) {
+        Uri.Builder uriBuilder = new Uri.Builder();
+        uriBuilder.scheme("https")
+                .authority("api.themoviedb.org")
+                .appendPath("3")
+                .appendPath("movie")
+                .appendPath(listingType) // A bit weird that this is a path since it doesn't end with /.
+                .appendQueryParameter("api_key", MOVIEDB_API_KEY);
+
+        String urlString = uriBuilder.build().toString();
+        return urlString;
+    }
+
+    private class FetchMovieDBTask extends AsyncTask<String, Void, String[]> {
+
+        // Performs API call and parses the data to readable JSON format.
+
+        @Override
+        protected String[] doInBackground(String... params) {
+            // These two need to be declared outside the try/catch
+            // so that they can be closed in the finally block.
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            // Will contain the raw JSON response as a string.
+            String returnJsonStr = null;
+            String[] movieStrings;
+
+            try {
+                String URLstring = params[0];
+                //Log.v(LOG_TAG, URLstring);
+
+                URL url = new URL(URLstring);
+
+                // Check permissions for internet.
+                // checkSelfPermission();
+
+                // Create the request to API, and open the connection
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    return null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    return null;
+                }
+                returnJsonStr = buffer.toString();
+
+                //Log.v(LOG_TAG, forecastJsonStr);
+
+                 movieStrings = getMovieDataFromJson(returnJsonStr);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error ", e);
+                // If the code didn't successfully get the data, there's no point in attempting
+                // to parse it.
+                return null;
+            } catch (SecurityException e) {
+                Log.e(LOG_TAG, "Error ", e);
+                // Permissions were not set correctly.
+                return null;
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "Error: ", e);
+                // Error in JSON parsing.
+                return null;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+            }
+
+            return movieStrings;
+        }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            if (result != null) {
+                for (String str : result) {
+                    Log.i(LOG_TAG, str);
+                }
+            }
+        }
+
+        /**
+         * Take the String representing the complete movie list in JSON Format and
+         * pull out the data we need to construct the Strings needed for the wireframes.
+         *
+         * Fortunately parsing is easy:  constructor takes the JSON string and converts it
+         * into an Object hierarchy for us.
+         */
+        private String[] getMovieDataFromJson(String movieJsonStr)
+                throws JSONException {
+
+            // These are the names of the JSON objects that need to be extracted.
+            final String MDB_RESULTS = "results";
+            final String MDB_TITLE = "title";
+            final String MDB_VOTE_AVERAGE = "vote_average";
+
+            JSONObject movieJson = new JSONObject(movieJsonStr);
+            JSONArray movieArray = movieJson.getJSONArray(MDB_RESULTS);
+
+            //String[] resultStrs = new String[numDays];
+            final int numberOfMovies = movieArray.length();
+            String[] movieStrs = new String[numberOfMovies];
+            for(int i = 0; i < numberOfMovies; i++) {
+                // Get the JSON object representing the movie.
+                JSONObject movieInfo = movieArray.getJSONObject(i);
+
+                String movieTitle = movieInfo.getString(MDB_TITLE);
+                String movieVoteAverage = movieInfo.getString(MDB_VOTE_AVERAGE);
+
+                movieStrs[i] = movieTitle + " with average: " + movieVoteAverage;
+            }
+
+            for (String s : movieStrs) {
+                Log.v(LOG_TAG, "Movie entry: " + s);
+            }
+
+            return movieStrs;
+        }
+    }
+
+    // API stuff
+    // https://api.themoviedb.org/3/movie/550?api_key=c3904d3a83cbe46c87a641fcbb7673e5
+    // v3 auth c3904d3a83cbe46c87a641fcbb7673e5
+    // v4 auth iYjc2NzNlNSIsInN1YiI6IjU4MDNkYzAyYzNhMzY4MTZmMjAwM2E1OCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.3S6w_cw_hIU31F0euDUUatBTzEIzxEND1bOmzcTEIIQ
 }
