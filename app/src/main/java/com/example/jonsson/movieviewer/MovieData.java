@@ -7,14 +7,23 @@ public class MovieData {
 
     MovieData() {}
 
-    /*
-    MovieData(String title, String averageVote, String posterURL) {
-        this.title = title;
-        this.averageVote = averageVote;
-        this.posterURL = posterURL;
-    }*/
+    MovieData(String[] data) {
+        this.title = data[0];
+        this.averageVote = data[1];
+        this.posterURL = data[2];
+    }
+
+    String[] toStringArray() {
+        String[] strings = {
+                this.title,
+                this.averageVote,
+                this.posterURL};
+
+        return strings;
+    }
 
     String title;
     String averageVote;
     String posterURL;
+
 }

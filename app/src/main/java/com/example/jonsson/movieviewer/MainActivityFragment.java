@@ -39,7 +39,7 @@ public class MainActivityFragment extends Fragment {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private final String MOVIEDB_API_KEY = "c3904d3a83cbe46c87a641fcbb7673e5";
-    private ArrayAdapter<MovieData> mMoviePosterAdapter;
+    private ArrayAdapter<MovieData> mMovieDataAdapter;
 
     public MainActivityFragment() {
     }
@@ -57,7 +57,7 @@ public class MainActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         // Create an adapter to present the images.
-        mMoviePosterAdapter = new ArrayAdapter<MovieData>(
+        mMovieDataAdapter = new ArrayAdapter<MovieData>(
                 // Current context (fragment's parent activity)
                 getActivity(),
                 // ID of the layout to use to populate the GridView.
@@ -99,16 +99,20 @@ public class MainActivityFragment extends Fragment {
         // Get the gridview and assign the adapter and click listener.
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview);
         if (gridView != null) {
-            gridView.setAdapter(mMoviePosterAdapter);
+            gridView.setAdapter(mMovieDataAdapter);
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    //Toast.makeText(getActivity(), "Item " + position + " clicked.", Toast.LENGTH_SHORT).show();
-
                     // Create intent to launch a detailed activity.
                     Intent detailActivityIntent = new Intent(getActivity(), DetailActivity.class);
+
                     // Include which movie was clicked in the Intent info (temporarily).
                     detailActivityIntent.putExtra(INTENT_EXTRA_MESSAGE, String.valueOf(position));
+
+                    // Include the movie info.
+                    MovieData clickedMovieData = mMovieDataAdapter.getItem(position);
+                    detailActivityIntent.putExtra(DetailActivity.EXTRA_MOVIE_INFO, clickedMovieData.toStringArray());
+
                     // Include the movie Uri in the Intent.
                     //detailActivityIntent.setData()
                     startActivity(detailActivityIntent);
@@ -253,11 +257,11 @@ public class MainActivityFragment extends Fragment {
         @Override
         protected void onPostExecute(MovieData[] result) {
             if (result != null) {
-                mMoviePosterAdapter.clear();
+                mMovieDataAdapter.clear();
                 for (MovieData movieData : result) {
                     Log.i(LOG_TAG, movieData.title);
                     // Post movies to the display adapter.
-                    mMoviePosterAdapter.add(movieData);
+                    mMovieDataAdapter.add(movieData);
                 }
             }
         }

@@ -7,9 +7,15 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 public class DetailActivity extends AppCompatActivity {
+
+    static final String EXTRA_MOVIE_INFO = "com.example.jonsson.movieviewer.EXTRA_MOVIE_INFO";
+    private MovieData mMovieData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +36,16 @@ public class DetailActivity extends AppCompatActivity {
 
         // Get the intent extras.
         Intent spawnIntent = getIntent();
-        String intentMessage = spawnIntent.getStringExtra(MainActivityFragment.INTENT_EXTRA_MESSAGE);
+        //String intentMessage = spawnIntent.getStringExtra(MainActivityFragment.INTENT_EXTRA_MESSAGE);
+        String[] movieMessage = spawnIntent.getStringArrayExtra(EXTRA_MOVIE_INFO);
+        mMovieData = new MovieData(movieMessage);
         TextView headlineTextView = (TextView) findViewById(R.id.headlineTextView);
-        headlineTextView.setText(intentMessage);
+        ImageView posterImageView = (ImageView) findViewById(R.id.posterImageView);
+        headlineTextView.setText(mMovieData.title);
+        Picasso.with(this)
+                .load(mMovieData.posterURL)
+                .into(posterImageView);
+
     }
 
 }
