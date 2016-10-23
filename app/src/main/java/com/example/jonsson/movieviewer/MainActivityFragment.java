@@ -1,13 +1,11 @@
 package com.example.jonsson.movieviewer;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
@@ -40,8 +39,7 @@ public class MainActivityFragment extends Fragment {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private final String MOVIEDB_API_KEY = "c3904d3a83cbe46c87a641fcbb7673e5";
-    private ArrayAdapter<Integer> mMoviePosterAdapter;
-    private ArrayList<Integer> mMoviePosterList;
+    private ArrayAdapter<MovieData> mMoviePosterAdapter;
 
     public MainActivityFragment() {
     }
@@ -49,7 +47,7 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        updateMovieScreen();
     }
 
     @Override
@@ -58,46 +56,40 @@ public class MainActivityFragment extends Fragment {
         // Inflate the layout.
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mMoviePosterList = new ArrayList<>();
-        mMoviePosterList.add(R.drawable.anal_machine_intelligence);
-        mMoviePosterList.add(R.drawable.fint_vader_april);
-        mMoviePosterList.add(R.drawable.print2x);
-        mMoviePosterList.add(R.drawable.chessboard);
-        mMoviePosterList.add(R.drawable.starwhawk);
-        mMoviePosterList.add(R.drawable.figcone);
-        mMoviePosterList.add(R.drawable.eqn1270838124);
-        mMoviePosterList.add(R.drawable.exjobbsframlaggning_crop);
-        mMoviePosterList.add(R.drawable.parsplgv);
-        mMoviePosterList.add(R.drawable.spaps);
-
         // Create an adapter to present the images.
-        mMoviePosterAdapter = new ArrayAdapter<Integer>(
+        mMoviePosterAdapter = new ArrayAdapter<MovieData>(
                 // Current context (fragment's parent activity)
                 getActivity(),
                 // ID of the layout to use to populate the GridView.
                 R.layout.posterimages,
                 // ID of the specific ImageView to populate.
                 R.id.gridImageView,
-                new ArrayList<Integer>()) {
+                new ArrayList<MovieData>()) {
 
-            public int getCount() {
-                return mMoviePosterList.size();
-            }
-
+            /*
+             * Here we override the getView method to instruct the adapter where to get data to
+             * display in its View.
+             */
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.posterimages, parent, false);
                 }
 
-                ImageView imageView = (ImageView) convertView.findViewById(R.id.gridImageView);
-                Drawable myImage = ResourcesCompat.getDrawable(getResources(), R.drawable.anal_machine_intelligence, null);
+                //Drawable myImage = ResourcesCompat.getDrawable(getResources(), R.drawable.anal_machine_intelligence, null);
 
-                if (position <= mMoviePosterList.size()) {
+                if (position <= getCount()) {
+                    // Get the ImageView and TextView in the view layout to post in.
+                    ImageView imageView = (ImageView) convertView.findViewById(R.id.gridImageView);
+                    TextView textView = (TextView) convertView.findViewById(R.id.gridTextView);
+
                     // Loading image with Picasso.
                     Picasso.with(getActivity())
-                            .load(mMoviePosterList.get(position))
+                            .load(getItem(position).posterURL)
                             .into(imageView);
+
+                    // Set movie title as subtext.
+                    textView.setText(getItem(position).title);
                 }
 
                 return convertView;
@@ -112,12 +104,6 @@ public class MainActivityFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     //Toast.makeText(getActivity(), "Item " + position + " clicked.", Toast.LENGTH_SHORT).show();
-
-                    String queryString = getPopularMoviesURL();
-
-                    Log.i(LOG_TAG, queryString);
-
-                    new FetchMovieDBTask().execute(queryString);
 
                     // Create intent to launch a detailed activity.
                     Intent detailActivityIntent = new Intent(getActivity(), DetailActivity.class);
@@ -157,12 +143,35 @@ public class MainActivityFragment extends Fragment {
         return urlString;
     }
 
-    private class FetchMovieDBTask extends AsyncTask<String, Void, String[]> {
+    /*
+     * Returns the whole URL path to a poster, given the name.
+     */
+    private String getPosterURL(String posterName) {
+        String URLbase = "http://image.tmdb.org/t/p/";
+        String imageWidth = "w185/";
+        String posterURL = URLbase + imageWidth + posterName;
+        return posterURL;
+    }
+
+    /*
+     * Updates content on main movie display screen.
+     */
+    private void updateMovieScreen() {
+
+        String queryString = getPopularMoviesURL();
+
+        Log.i(LOG_TAG, queryString);
+
+        new FetchMovieDBTask().execute(queryString);
+
+    }
+
+    private class FetchMovieDBTask extends AsyncTask<String, Void, MovieData[]> {
 
         // Performs API call and parses the data to readable JSON format.
 
         @Override
-        protected String[] doInBackground(String... params) {
+        protected MovieData[] doInBackground(String... params) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -170,7 +179,8 @@ public class MainActivityFragment extends Fragment {
 
             // Will contain the raw JSON response as a string.
             String returnJsonStr = null;
-            String[] movieStrings;
+            //String[] movieStrings;
+            MovieData[] moviesData;
 
             try {
                 String URLstring = params[0];
@@ -207,11 +217,10 @@ public class MainActivityFragment extends Fragment {
                     // Stream was empty.  No point in parsing.
                     return null;
                 }
+
                 returnJsonStr = buffer.toString();
+                moviesData = getMovieDataFromJson(returnJsonStr);
 
-                //Log.v(LOG_TAG, forecastJsonStr);
-
-                 movieStrings = getMovieDataFromJson(returnJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the data, there's no point in attempting
@@ -238,14 +247,17 @@ public class MainActivityFragment extends Fragment {
                 }
             }
 
-            return movieStrings;
+            return moviesData;
         }
 
         @Override
-        protected void onPostExecute(String[] result) {
+        protected void onPostExecute(MovieData[] result) {
             if (result != null) {
-                for (String str : result) {
-                    Log.i(LOG_TAG, str);
+                mMoviePosterAdapter.clear();
+                for (MovieData movieData : result) {
+                    Log.i(LOG_TAG, movieData.title);
+                    // Post movies to the display adapter.
+                    mMoviePosterAdapter.add(movieData);
                 }
             }
         }
@@ -257,35 +269,44 @@ public class MainActivityFragment extends Fragment {
          * Fortunately parsing is easy:  constructor takes the JSON string and converts it
          * into an Object hierarchy for us.
          */
-        private String[] getMovieDataFromJson(String movieJsonStr)
+        private MovieData[] getMovieDataFromJson(String movieJsonStr)
                 throws JSONException {
 
             // These are the names of the JSON objects that need to be extracted.
             final String MDB_RESULTS = "results";
             final String MDB_TITLE = "title";
             final String MDB_VOTE_AVERAGE = "vote_average";
+            final String MDB_POSTER_PATH = "poster_path";
 
             JSONObject movieJson = new JSONObject(movieJsonStr);
             JSONArray movieArray = movieJson.getJSONArray(MDB_RESULTS);
 
             //String[] resultStrs = new String[numDays];
             final int numberOfMovies = movieArray.length();
-            String[] movieStrs = new String[numberOfMovies];
+            String[] movieStrs = new String[numberOfMovies]; // TEMP for display.
+            MovieData[] moviesData = new MovieData[numberOfMovies];
             for(int i = 0; i < numberOfMovies; i++) {
                 // Get the JSON object representing the movie.
                 JSONObject movieInfo = movieArray.getJSONObject(i);
 
                 String movieTitle = movieInfo.getString(MDB_TITLE);
                 String movieVoteAverage = movieInfo.getString(MDB_VOTE_AVERAGE);
+                String moviePosterPath = movieInfo.getString(MDB_POSTER_PATH);
+
+                MovieData movieData = new MovieData(); // Initialize empty.
+                movieData.title = movieTitle;
+                movieData.averageVote = movieVoteAverage;
+                movieData.posterURL = getPosterURL(moviePosterPath);
 
                 movieStrs[i] = movieTitle + " with average: " + movieVoteAverage;
+                moviesData[i] = movieData;
             }
 
             for (String s : movieStrs) {
                 Log.v(LOG_TAG, "Movie entry: " + s);
             }
 
-            return movieStrs;
+            return moviesData;
         }
     }
 
