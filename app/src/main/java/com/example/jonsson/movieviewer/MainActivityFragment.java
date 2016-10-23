@@ -8,6 +8,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -35,6 +38,8 @@ import java.util.ArrayList;
  */
 public class MainActivityFragment extends Fragment {
 
+    private enum MovieDisplayMode {TOP_RATED, MOST_POPULAR}
+
     public final static String INTENT_EXTRA_MESSAGE = "com.example.jonsson.movieviewer.EXTRA_MESSAGE";
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
@@ -47,7 +52,8 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        updateMovieScreen();
+        setHasOptionsMenu(true);
+        updateMovieScreen(MovieDisplayMode.MOST_POPULAR);
     }
 
     @Override
@@ -126,6 +132,27 @@ public class MainActivityFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_main_fragment, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_display_popular) {
+            updateMovieScreen(MovieDisplayMode.MOST_POPULAR);
+            return true;
+        }
+        else if (id == R.id.action_display_toprated) {
+            updateMovieScreen(MovieDisplayMode.TOP_RATED);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     private String getPopularMoviesURL() {
         return createMovieDataBaseURL("popular");
     }
@@ -160,9 +187,19 @@ public class MainActivityFragment extends Fragment {
     /*
      * Updates content on main movie display screen.
      */
-    private void updateMovieScreen() {
-
-        String queryString = getPopularMoviesURL();
+    private void updateMovieScreen(MovieDisplayMode displayMode) {
+        String queryString;
+        switch (displayMode) {
+            case MOST_POPULAR:
+                queryString = getPopularMoviesURL();
+                break;
+            case TOP_RATED:
+                queryString = getTopRatedMoviesURL();
+                break;
+            default:
+                queryString = "";
+                break;
+        }
 
         Log.i(LOG_TAG, queryString);
 

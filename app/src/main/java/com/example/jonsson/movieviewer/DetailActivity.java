@@ -45,7 +45,6 @@ public class DetailActivity extends AppCompatActivity {
         Picasso.with(this)
                 .load(mMovieData.posterURL)
                 .into(posterImageView);
-
     }
 
 }
