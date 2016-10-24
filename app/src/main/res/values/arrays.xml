@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="pref_display_mode_names">
+        <item>@string/pref_display_mode_popular</item>
+        <item>@string/pref_display_mode_toprated</item>
+    </string-array>
+
+    <string-array name="pref_display_mode_keys">
+        <item>@string/pref_display_mode_key_popular</item>
+        <item>@string/pref_display_mode_key_toprated</item>
+    </string-array>
+
+</resources>

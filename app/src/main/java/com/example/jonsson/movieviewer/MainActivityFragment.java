@@ -1,9 +1,11 @@
 package com.example.jonsson.movieviewer;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -53,7 +55,8 @@ public class MainActivityFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        updateMovieScreen(MovieDisplayMode.MOST_POPULAR);
+        String displayModeString = getCurrentDisplayMode();
+        updateMovieScreen(displayModeString);
     }
 
     @Override
@@ -142,11 +145,17 @@ public class MainActivityFragment extends Fragment {
         int id = item.getItemId();
 
         if (id == R.id.action_display_popular) {
-            updateMovieScreen(MovieDisplayMode.MOST_POPULAR);
+            SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+            preferences.putString(getString(R.string.pref_display_mode_key), getString(R.string.pref_display_mode_key_popular));
+            preferences.commit();
+            updateMovieScreen(getString(R.string.pref_display_mode_key_popular));
             return true;
         }
         else if (id == R.id.action_display_toprated) {
-            updateMovieScreen(MovieDisplayMode.TOP_RATED);
+            SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+            preferences.putString(getString(R.string.pref_display_mode_key), getString(R.string.pref_display_mode_key_toprated));
+            preferences.commit();
+            updateMovieScreen(getString(R.string.pref_display_mode_key_toprated));
             return true;
         }
 
@@ -202,9 +211,9 @@ public class MainActivityFragment extends Fragment {
     /*
      * Updates content on main movie display screen.
      */
-    private void updateMovieScreen(MovieDisplayMode displayMode) {
+    private void updateMovieScreen(String displayModeString) {
         String queryString;
-        switch (displayMode) {
+        /*switch (displayMode) {
             case MOST_POPULAR:
                 queryString = getPopularMoviesURL();
                 break;
@@ -214,12 +223,26 @@ public class MainActivityFragment extends Fragment {
             default:
                 queryString = "";
                 break;
-        }
+        }*/
+        queryString = createMovieDataBaseURL(displayModeString);
 
         Log.i(LOG_TAG, queryString);
 
         new FetchMovieDBTask().execute(queryString);
 
+    }
+
+    /*
+     * Get display mode from preferences.
+     */
+    private String getCurrentDisplayMode() {
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String displayModeString = preferences.getString(
+                getString(R.string.pref_display_mode_key),
+                getString(R.string.action_display_popular));
+
+        return displayModeString;
     }
 
     private class FetchMovieDBTask extends AsyncTask<String, Void, MovieData[]> {

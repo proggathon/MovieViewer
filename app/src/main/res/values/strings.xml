@@ -4,4 +4,12 @@
     <string name="title_activity_detail">DetailActivity</string>
     <string name="action_display_popular">Most popular movies</string>
     <string name="action_display_toprated">Top rated movies</string>
+
+    <string name="pref_display_mode_key">pref_display_mode_key</string>
+    <string name="pref_display_mode_label">Display mode</string>
+    <string name="pref_display_mode_popular">Most popular first</string>
+    <string name="pref_display_mode_toprated">Top rated first</string>
+    <string name="pref_display_mode_key_popular">popular</string>
+    <string name="pref_display_mode_key_toprated">top_rated</string>
+
 </resources>
