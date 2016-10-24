@@ -8,22 +8,29 @@ public class MovieData {
     MovieData() {}
 
     MovieData(String[] data) {
-        this.title = data[0];
-        this.averageVote = data[1];
-        this.posterURL = data[2];
+        int counter = 0;
+        this.title = data[counter++];
+        this.averageVote = data[counter++];
+        this.overview = data[counter++];
+        this.posterSmallURL = data[counter++];
+        this.posterLargeURL = data[counter++];
     }
 
     String[] toStringArray() {
         String[] strings = {
                 this.title,
                 this.averageVote,
-                this.posterURL};
+                this.overview,
+                this.posterSmallURL,
+                this.posterLargeURL};
 
         return strings;
     }
 
     String title;
     String averageVote;
-    String posterURL;
+    String overview;
+    String posterSmallURL;
+    String posterLargeURL;
 
 }

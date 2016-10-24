@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,9 +10,9 @@
     tools:showIn="@layout/activity_detail">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/posterImageView" />
+        android:layout_width="200dp"
+        android:id="@+id/posterImageView"
+        android:layout_height="300dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -20,6 +20,22 @@
         android:text="Placeholder Text"
         android:id="@+id/headlineTextView"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_toRightOf="@+id/posterImageView"
+        android:layout_toEndOf="@+id/posterImageView"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="24dp"
+        android:textSize="18sp"
+        android:textStyle="normal|bold" />
 
-</LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Placeholder Text"
+        android:id="@+id/overviewTextView"
+        android:layout_marginTop="25dp"
+        android:layout_below="@+id/headlineTextView"
+        android:layout_alignLeft="@+id/headlineTextView"
+        android:layout_alignStart="@+id/headlineTextView" />
+
+</RelativeLayout>

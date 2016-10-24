@@ -40,10 +40,12 @@ public class DetailActivity extends AppCompatActivity {
         String[] movieMessage = spawnIntent.getStringArrayExtra(EXTRA_MOVIE_INFO);
         mMovieData = new MovieData(movieMessage);
         TextView headlineTextView = (TextView) findViewById(R.id.headlineTextView);
+        TextView overviewTextView = (TextView) findViewById(R.id.overviewTextView);
         ImageView posterImageView = (ImageView) findViewById(R.id.posterImageView);
         headlineTextView.setText(mMovieData.title);
+        overviewTextView.setText(mMovieData.overview);
         Picasso.with(this)
-                .load(mMovieData.posterURL)
+                .load(mMovieData.posterSmallURL)
                 .into(posterImageView);
     }
 

@@ -91,7 +91,7 @@ public class MainActivityFragment extends Fragment {
 
                     // Loading image with Picasso.
                     Picasso.with(getActivity())
-                            .load(getItem(position).posterURL)
+                            .load(getItem(position).posterSmallURL)
                             .into(imageView);
 
                     // Set movie title as subtext.
@@ -175,12 +175,27 @@ public class MainActivityFragment extends Fragment {
     }
 
     /*
+     * Returns the whole URL path to a small poster, given the name.
+     */
+    private String getSmallPosterURL(String posterName) {
+        String imageWidth = "w185/";
+        return getPosterURL(posterName, imageWidth);
+    }
+
+    /*
+     * Returns the whole URL path to a large poster, given the name.
+     */
+    private String getLargePosterURL(String posterName) {
+        String imageWidth = "w500/";
+        return getPosterURL(posterName, imageWidth);
+    }
+
+    /*
      * Returns the whole URL path to a poster, given the name.
      */
-    private String getPosterURL(String posterName) {
+    private String getPosterURL(String posterName, String widthString) {
         String URLbase = "http://image.tmdb.org/t/p/";
-        String imageWidth = "w185/";
-        String posterURL = URLbase + imageWidth + posterName;
+        String posterURL = URLbase + widthString + posterName;
         return posterURL;
     }
 
@@ -317,6 +332,7 @@ public class MainActivityFragment extends Fragment {
             final String MDB_RESULTS = "results";
             final String MDB_TITLE = "title";
             final String MDB_VOTE_AVERAGE = "vote_average";
+            final String MDB_OVERVIEW = "overview";
             final String MDB_POSTER_PATH = "poster_path";
 
             JSONObject movieJson = new JSONObject(movieJsonStr);
@@ -333,11 +349,14 @@ public class MainActivityFragment extends Fragment {
                 String movieTitle = movieInfo.getString(MDB_TITLE);
                 String movieVoteAverage = movieInfo.getString(MDB_VOTE_AVERAGE);
                 String moviePosterPath = movieInfo.getString(MDB_POSTER_PATH);
+                String movieOverview = movieInfo.getString(MDB_OVERVIEW);
 
                 MovieData movieData = new MovieData(); // Initialize empty.
                 movieData.title = movieTitle;
                 movieData.averageVote = movieVoteAverage;
-                movieData.posterURL = getPosterURL(moviePosterPath);
+                movieData.overview = movieOverview;
+                movieData.posterSmallURL = getSmallPosterURL(moviePosterPath);
+                movieData.posterLargeURL = getLargePosterURL(moviePosterPath);
 
                 movieStrs[i] = movieTitle + " with average: " + movieVoteAverage;
                 moviesData[i] = movieData;
