@@ -45,7 +45,6 @@ public class MainActivityFragment extends Fragment {
     public final static String INTENT_EXTRA_MESSAGE = "com.example.jonsson.movieviewer.EXTRA_MESSAGE";
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
-    private final String MOVIEDB_API_KEY = "c3904d3a83cbe46c87a641fcbb7673e5";
     private ArrayAdapter<MovieData> mMovieDataAdapter;
 
     public MainActivityFragment() {
@@ -177,7 +176,7 @@ public class MainActivityFragment extends Fragment {
                 .appendPath("3")
                 .appendPath("movie")
                 .appendPath(listingType) // A bit weird that this is a path since it doesn't end with /.
-                .appendQueryParameter("api_key", MOVIEDB_API_KEY);
+                .appendQueryParameter("api_key", "@keys/MDB_API_KEY");
 
         String urlString = uriBuilder.build().toString();
         return urlString;
