@@ -363,6 +363,7 @@ public class MainActivityFragment extends Fragment {
             final String MDB_VOTE_AVERAGE = "vote_average";
             final String MDB_OVERVIEW = "overview";
             final String MDB_POSTER_PATH = "poster_path";
+            final String MDB_RELEASE_DATE = "release_date";
 
             JSONObject movieJson = new JSONObject(movieJsonStr);
             JSONArray movieArray = movieJson.getJSONArray(MDB_RESULTS);
@@ -377,13 +378,15 @@ public class MainActivityFragment extends Fragment {
 
                 String movieTitle = movieInfo.getString(MDB_TITLE);
                 String movieVoteAverage = movieInfo.getString(MDB_VOTE_AVERAGE);
-                String moviePosterPath = movieInfo.getString(MDB_POSTER_PATH);
                 String movieOverview = movieInfo.getString(MDB_OVERVIEW);
+                String movieReleaseDate = movieInfo.getString(MDB_RELEASE_DATE);
+                String moviePosterPath = movieInfo.getString(MDB_POSTER_PATH);
 
                 MovieData movieData = new MovieData(); // Initialize empty.
                 movieData.title = movieTitle;
                 movieData.averageVote = movieVoteAverage;
                 movieData.overview = movieOverview;
+                movieData.releaseDate = movieReleaseDate;
                 movieData.posterSmallURL = getSmallPosterURL(moviePosterPath);
                 movieData.posterLargeURL = getLargePosterURL(moviePosterPath);
 

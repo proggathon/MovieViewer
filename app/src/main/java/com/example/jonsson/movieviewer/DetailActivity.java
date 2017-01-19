@@ -41,9 +41,12 @@ public class DetailActivity extends AppCompatActivity {
         mMovieData = new MovieData(movieMessage);
         TextView headlineTextView = (TextView) findViewById(R.id.headlineTextView);
         TextView overviewTextView = (TextView) findViewById(R.id.overviewTextView);
+        TextView releaseDateTextView = (TextView) findViewById(R.id.releaseDateTextView);
         ImageView posterImageView = (ImageView) findViewById(R.id.posterImageView);
         headlineTextView.setText(mMovieData.title);
         overviewTextView.setText(mMovieData.overview);
+        releaseDateTextView.setText(mMovieData.releaseDate);
+
         Picasso.with(this)
                 .load(mMovieData.posterSmallURL)
                 .into(posterImageView);

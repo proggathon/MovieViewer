@@ -12,6 +12,7 @@ public class MovieData {
         this.title = data[counter++];
         this.averageVote = data[counter++];
         this.overview = data[counter++];
+        this.releaseDate = data[counter++];
         this.posterSmallURL = data[counter++];
         this.posterLargeURL = data[counter++];
     }
@@ -21,6 +22,7 @@ public class MovieData {
                 this.title,
                 this.averageVote,
                 this.overview,
+                this.releaseDate,
                 this.posterSmallURL,
                 this.posterLargeURL};
 
@@ -30,6 +32,7 @@ public class MovieData {
     String title;
     String averageVote;
     String overview;
+    String releaseDate;
     String posterSmallURL;
     String posterLargeURL;
 

@@ -31,11 +31,23 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/headlineTextView"
+        android:layout_alignRight="@+id/overviewTextView"
+        android:layout_alignEnd="@+id/overviewTextView"
+        android:layout_marginRight="21dp"
+        android:layout_marginEnd="21dp"
+        android:layout_marginTop="34dp"
+        android:id="@+id/releaseDateTextView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Placeholder Text"
         android:id="@+id/overviewTextView"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="101dp"
         android:layout_below="@+id/headlineTextView"
         android:layout_alignLeft="@+id/headlineTextView"
         android:layout_alignStart="@+id/headlineTextView" />
+
 
 </RelativeLayout>
