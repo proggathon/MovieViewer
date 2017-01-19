@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -176,7 +177,9 @@ public class MainActivityFragment extends Fragment {
                 .appendPath("3")
                 .appendPath("movie")
                 .appendPath(listingType) // A bit weird that this is a path since it doesn't end with /.
-                .appendQueryParameter("api_key", "@keys/MDB_API_KEY");
+                .appendQueryParameter("api_key", getResources().getString(R.string.MDB_API_KEY));
+                // Apparently you can no longer access own xml files through e.g. R.keys.MDB_API_KEY
+                // but rather have to access it by its type as done above.
 
         String urlString = uriBuilder.build().toString();
         return urlString;
@@ -337,6 +340,10 @@ public class MainActivityFragment extends Fragment {
                     // Post movies to the display adapter.
                     mMovieDataAdapter.add(movieData);
                 }
+            }
+            else {
+                String errMessage = "Couldn't get movie list. See log for more information.";
+                Toast.makeText(getActivity(), errMessage, Toast.LENGTH_SHORT).show();
             }
         }
 
